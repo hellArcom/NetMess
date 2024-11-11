@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netmess</title>
+    <link rel="stylesheet" href="/static/chat.css">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div id="chat-container">
+        <div id="header">
+            <h1>Netmess</h1>
+            <span>Connecté en tant que <strong>{{ username }}</strong></span>
+        </div>
+        <div id="chat-box">
+            {% for id, username, message, created_at in messages %}
+                <div class="message">
+                    <span class="username">{{ username|e }}</span>
+                    <span class="timestamp">({{ created_at }}) </span>
+                    <span class="message-content"> {{ message | safe_message }}</span>
+                </div>
+            {% endfor %}
+        </div>        
+        <div id="input-container">
+            <input type="text" id="message" placeholder="Entrez votre message..." class="input-field">
+            <button onclick="sendMessage()" class="btn">Envoyer</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+
+        const username = "{{ username|e }}";  // Utilisez la variable serveur pour obtenir le pseudo
+        if (!username) {
+            window.location.href = '/';
+        }
+
+        const socket = io();
+        let nouveau_msg = 0;  // Compteur de nouveaux messages
+
+        socket.on('connect', () => {
+            console.log('Connecté au serveur');
+        });
+
+        // Réception de message depuis le serveur
+        socket.on('message', (data) => {
+            console.log('Message reçu du serveur : ', data);
+            addMessageToChatBox({
+                username: data.split(': ')[0],  // Prend le pseudo du message
+                timestamp: new Date().toLocaleString(),
+                content: data.split(': ')[1]     // Prend le contenu du message
+            });
+            if (document.visibilityState === 'hidden') {  // Si l'utilisateur n'est pas sur la page
+                nouveau_msg++;  // Incrémente le compteur de nouveaux messages
+                updateTitle();  // Met à jour le titre de la page
+            }
+        });
+
+        // Fonction pour envoyer un message
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            if (message) {
+                const fullMessage = `${username}: ${message}`;
+                socket.send(fullMessage); // Envoi du message formaté
+                document.getElementById('message').value = ''; // Réinitialise le champ
+            }
+        }
+
+        // Ajoute un message dans la boîte de chat
+        function addMessageToChatBox({ username, timestamp, content }) {
+            const chatBox = document.getElementById('chat-box');
+            const newMessage = document.createElement('div');
+            newMessage.classList.add('message');
+            newMessage.innerHTML = `<span class="username">${username}</span><span class="timestamp">(${timestamp})</span><span class="message-content">${content}</span>`;
+            chatBox.appendChild(newMessage);
+            scrollToBottom();  // Faire défiler vers le bas après l'ajout d'un message
+        }
+
+        // Fonction pour faire défiler vers le bas
+        function scrollToBottom() {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.scrollTop = chatBox.scrollHeight;  // Faire défiler vers le bas
+        }
+
+        // Gestion de l'envoi avec la touche "Entrée"
+        document.getElementById('message').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();  // Appelle la fonction d'envoi de message
+            }
+        });
+
+        // Appel à scrollToBottom() après le chargement initial
+        window.onload = function() {
+            scrollToBottom();
+        };
+
+        // Fonction pour mettre à jour le titre de la page
+        function updateTitle() {
+            document.title = nouveau_msg > 0 ? `(${nouveau_msg}) Netmess` : 'Netmess';
+        }
+
+        // Réinitialise le compteur lorsque l'utilisateur revient sur la page
+        function removeNotificationCountFromTitle() {
+            nouveau_msg = 0;  // Réinitialise le compteur
+            updateTitle();    // Met à jour le titre sans les notifications
+        }
+
+        // Écouteur d'événements pour détecter si l'utilisateur est sur la page ou non
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                removeNotificationCountFromTitle();  // Réinitialise le compteur de messages non lus
+            }
+        });
+
+    </script>
+</body>
+<footer>
+    <p>
+        <a href="politique" target="_blank">Version en cours de développement.</a>
+        <p> / </p>
+        <a href="https://www.paypal.com/donate/?hosted_button_id=D74ZPSJPSR6QJ" target="_blank">Dons</a>
+    </p>
+</footer>
+</html>

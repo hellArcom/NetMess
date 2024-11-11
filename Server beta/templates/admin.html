@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paneau de contole !</title>
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <style>
+        /* Votre style ici (inchangé) */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centrer verticalement */
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+        }
+
+        #admin-container {
+            width: 80%;
+            max-height: 80vh; /* Limiter la hauteur */
+            padding: 20px;
+            background: #2c2c2c;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Permet le défilement si nécessaire */
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #4caf50;
+            margin-top: 20px;
+        }
+
+        form {
+            margin-top: 10px;
+        }
+
+        input[type="password"], input[type="text"] {
+            padding: 10px;
+            border: 1px solid #298e92;
+            border-radius: 5px;
+            background-color: #2c2c2c;
+            color: #f0f0f0;
+            margin-right: 10px;
+            width: 200px; /* Ajuster la largeur des champs */
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:active {
+            background-color: #3e8e41;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0; /* Supprimer les marges */
+        }
+
+        li {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #383838;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        p {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="admin-container">
+        <h1>Page d'administration</h1>
+        {% if not session.get('authenticated') %}
+            <form method="POST">
+                <label for="code">Entrez le code d'accès:</label>
+                <input type="password" name="code" id="code" required>
+                <button type="submit">Valider</button>
+            </form>
+        {% else %}
+            <h2>Messages</h2>
+            <ul>
+                {% for msg in messages %}
+                    <li>
+                        {{ msg[1] }} : {{ msg[2] }} 
+                        <form method="POST" action="{{ url_for('delete_message', message_id=msg[0]) }}" style="display:inline;">
+                            <button type="submit">Supprimer</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+            <h2>Gestion des utilisateurs bannis</h2>
+            <form id="ban-form" method="POST" action="{{ url_for('ban_user') }}">
+                <input type="text" name="user_id" placeholder="ID de l'utilisateur à bannir" required>
+                <label for="ban_code">Entrez le code d'accès:</label>
+                <input type="password" name="ban_code" id="ban_code" required>
+                <button type="submit">Bannir</button>
+            </form>
+            <form id="unban-form" method="POST" action="{{ url_for('unban_user') }}">
+                <input type="text" name="user_id" placeholder="ID de l'utilisateur à débannir" required>
+                <label for="unban_code">Entrez le code d'accès:</label>
+                <input type="password" name="unban_code" id="unban_code" required>
+                <button type="submit">Débannir</button>
+            </form>
+            <a href="{{ url_for('logout') }}">Déconnexion</a>
+        {% endif %}
+
+        {% if error %}
+            <p>{{ error }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>

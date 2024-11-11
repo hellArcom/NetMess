@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion au Chat</title>
+    <link rel="stylesheet" href="/static/login.css">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div id="login-container">
+        <form action="/login" method="post">
+            <label for="username">Nom d'utilisateur:</label>
+            <input type="text" id="username" name="username" class="input-field" required>
+            <label for="password">Mot de passe:</label>
+            <input type="password" id="password" name="password" class="input-field" required>
+            <button type="submit" class="btn">Se connecter</button>
+        </form>        
+
+        <p>En continuant, vous acceptez les  <a href="politique">Politique de confidentialité et conditions d'utilisation</a></p>
+    </div>
+</body>
+</html>
