@@ -9,7 +9,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "SDP.py"
+      "dest": "app.py"
     }
   ]
 }
